@@ -23,34 +23,45 @@
 #  
 
 """
-The script help you to enable replication between 2 servers
+The script help you to enable push replication between 2 servers
 
 Usage:
-python couch_set_repl.py source_url target_url
+python couch_set_repl.py --source/-s source_host:port  --target/-t target_host:port
 
 Example:
-python couch_set_repl.py  http://couch-src.example.com:5984/ http://couch-trg.example.com:5984/
+python couch_set_repl.py  -s couch-src.example.com:5984 -t couch-trg.example.com:5984
 """
 
-import sys
 import couchquery
 import couchdb
+import argparse
+from argparse import RawTextHelpFormatter
+
+
+def arguments():
+    parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter,
+                                     description="This script create push replication for all databases")
+    parser.add_argument('-t', '--target', help='Target COUCHDB Server')
+    parser.add_argument('-s', '--source', help='Source COUCHDB Server')
+
+    return parser
+
 
 
 def main(dbsource, dbtarget):
-    couchdbserver = couchdb.Server(dbsource)
-    dbrep = couchquery.Database(dbsource + '_replicator')
+    couchdbserver = couchdb.Server('http://'+dbsource+'/')
+    dbrep = couchquery.Database('http://' + dbsource + '/' + '_replicator')
 
     for id in couchdbserver:
-        print id
         if id != '_replicator' and id != '_users':
-            dbrep.create({'source': id, 'target': dbtarget + id, 'create_target': True, 'continuous': True})
+            dbrep.create({'_id': id+'_to_'+dbtarget, 'source': id, 'target': 'http://'+dbtarget+'/'+id,
+                          'create_target': True, 'continuous': True})
     return 0
 
 if __name__ == '__main__':
     try:
-        dbsource = sys.argv[1]
-        dbtarget = sys.argv[2]
-        main(dbsource,dbtarget)
-    except IndexError:
-        print(__doc__)
+        dbsource = arguments().parse_args().source
+        dbtarget = arguments().parse_args().target
+        main(dbsource, dbtarget)
+    except:
+        arguments().print_help()
