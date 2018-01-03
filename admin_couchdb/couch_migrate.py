@@ -32,7 +32,6 @@ Example:
 python couch_migrate.py  -s couch-src.example.com:5984 -t couch-trg.example.com:5984
 """
 
-import couchquery
 import couchdb
 import requests
 import argparse

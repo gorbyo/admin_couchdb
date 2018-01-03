@@ -23,5 +23,5 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python',
         ],
-    requires=['couchdb', 'couchquery']
+    requires=['couchdb', 'couchquery', 'requests']
 )
